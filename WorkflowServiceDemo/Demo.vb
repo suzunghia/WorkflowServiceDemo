@@ -15,28 +15,42 @@
         End If
 
         'Call create request
-        Dim request = create(ws)
-        If Not request Is Nothing Then
-            'Call update
-            'update(ws, request)
+        'Dim request = create(ws)
+        'If Not request Is Nothing Then
+        '    'Update
+        '    update(ws, request)
 
-            'Call delete
-            'Dim deleteRequest As Task(Of Boolean) = ws.DeleteRequest(request.request.requestId)
-            'deleteRequest.Wait()
-            'If deleteRequest.Result Then
-            'Console.Write("DELETE REQUEST: ")
-            '   Console.WriteLine(request.request.requestId)
-            'End If
-        End If
+        '    'Delete
+        '    Dim deleteRequest As Task(Of Boolean) = ws.DeleteRequest(request.request.requestId)
+        '    deleteRequest.Wait()
+        '    If deleteRequest.Result Then
+        '        Console.Write("DELETE REQUEST: ")
+        '        Console.WriteLine(request.request.requestId)
+        '    End If
+        'End If
+
+        'Update
+        'Dim temp As New RequestInfo()
+        'temp.request = New Request()
+        'temp.request.requestId = 500
+        'update(ws, temp)
+
+        'Delete
+        'Dim deleteRequest As Task(Of Boolean) = ws.DeleteRequest(500)
+        'deleteRequest.Wait()
+        'If deleteRequest.Result Then
+        '    Console.Write("DELETE REQUEST: ")
+        '    Console.WriteLine(500)
+        'End If
 
         'Get list request
-        Dim requestIds As New List(Of Id)
-        requestIds.Add(New Id(1234))
-        Dim getListRequest As Task(Of List(Of Request)) = ws.GetRequestStatus(requestIds)
-        If Not getListRequest Is Nothing Then
-            Console.WriteLine("LIST REQUEST: ")
-            For Each item As Request In getListRequest.Result
-                Console.WriteLine("requestId: " + item.requestId + "/status:" + item.requestStatus)
+        Dim requestids As New List(Of Id)
+        requestids.Add(New Id(1417))
+        Dim getlistrequest As Task(Of ListRequest) = ws.GetRequestStatus(requestids)
+        If Not getlistrequest Is Nothing Then
+            Console.WriteLine("list request: ")
+            For Each item As Request In getlistrequest.Result.list
+                Console.WriteLine("requestid: " + item.requestId.ToString + "/ status: " + item.requestStatus.ToString)
             Next
         End If
         Console.ReadKey(True)
@@ -64,10 +78,15 @@
         requestUpdate.requestStatus = 2
         requestUpdate.subject = "TEST"
         requestUpdate.formData = ""
-        requestUpdate.process = request.process
-        requestUpdate.process(0).staffId = 10
-        requestUpdate.process(0).orgId = 1
-        requestUpdate.process(0).posId = 3
+
+
+        Dim process As New RequestProcess()
+        process.requestStep = 1
+        process.staffId = 10
+        process.orgId = 1
+        process.posId = 3
+        requestUpdate.process = New List(Of RequestProcess)
+        requestUpdate.process.Add(process)
 
         Dim updateRequest As Task(Of RequestInfo) = ws.UpdateRequest(request.request.requestId, requestUpdate)
         updateRequest.Wait()

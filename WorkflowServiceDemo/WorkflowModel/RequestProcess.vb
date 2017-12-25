@@ -1,6 +1,7 @@
 ﻿Public Class RequestProcess
     Public requestProcessId As Long?
     Public requestRouteDetailId As Long?
+    Public requestStep As Integer?
     Public approveStatus As Integer?
     Public allowSkip As Integer?
     Public skipByUser As Integer?
