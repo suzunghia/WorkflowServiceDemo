@@ -1,9 +1,11 @@
-﻿Module Demo
+﻿Imports Newtonsoft.Json
+
+Module Demo
 
     Sub Main()
-        Dim url As String = "https://devweb-39812297.ap-northeast-1.elb.amazonaws.com/workflow/"
-
-        Dim ws As New WorkflowService(url, "1111", "123456")
+        Dim url As String = "https://dev.e2-cloud.jp/workflow/"
+        url = "http://localhost:8080"
+        Dim ws As New WorkflowService(url, "1234", "123456")
 
         'Call get token - example
         Dim getToken As Task(Of TokenResult) = ws.GetToken()
@@ -15,41 +17,39 @@
         End If
 
         'Call create request
-        'Dim request = create(ws)
-        'If Not request Is Nothing Then
-        '    'Update
-        '    update(ws, request)
+        'create(ws)
 
-        '    'Delete
-        '    Dim deleteRequest As Task(Of Boolean) = ws.DeleteRequest(request.request.requestId)
-        '    deleteRequest.Wait()
-        '    If deleteRequest.Result Then
-        '        Console.Write("DELETE REQUEST: ")
-        '        Console.WriteLine(request.request.requestId)
-        '    End If
-        'End If
+        'Dim requestInfo As Task(Of RequestInfo)
 
         'Update
-        'Dim temp As New RequestInfo()
-        'temp.request = New Request()
-        'temp.request.requestId = 500
-        'update(ws, temp)
+        'requestInfo = ws.GetRequest(569)
+        'If Not requestInfo.Result Is Nothing Then
+        '    update(ws, requestInfo.Result)
+        'End If
+
+        'Apply
+        'requestInfo = ws.GetRequest(571)
+        'If Not requestInfo.Result Is Nothing Then
+        '    apply(ws, requestInfo.Result)
+        'End If
 
         'Delete
-        'Dim deleteRequest As Task(Of Boolean) = ws.DeleteRequest(500)
+        'Dim deleteRequest As Task(Of Boolean) = ws.DeleteRequest(569)
         'deleteRequest.Wait()
         'If deleteRequest.Result Then
         '    Console.Write("DELETE REQUEST: ")
-        '    Console.WriteLine(500)
+        '    Console.WriteLine(569)
         'End If
 
         'Get list request
         Dim requestids As New List(Of Id)
-        requestids.Add(New Id(1417))
-        Dim getlistrequest As Task(Of ListRequest) = ws.GetRequestStatus(requestids)
-        If Not getlistrequest Is Nothing Then
-            Console.WriteLine("list request: ")
-            For Each item As Request In getlistrequest.Result.list
+        requestids.Add(New Id(569))
+        requestids.Add(New Id(570))
+        requestids.Add(New Id(571))
+        Dim listRequest As Task(Of List(Of Request)) = ws.GetRequestStatus(requestids)
+        If Not listRequest Is Nothing Then
+            Console.WriteLine("List request: ")
+            For Each item As Request In listRequest.Result
                 Console.WriteLine("requestid: " + item.requestId.ToString + "/ status: " + item.requestStatus.ToString)
             Next
         End If
@@ -58,10 +58,18 @@
 
     Private Function create(ByRef ws As WorkflowService) As RequestInfo
         Dim requestCreation As New RequestCreation()
-        requestCreation.requestFormDetailRelaId = "NGHIATEST"
-        requestCreation.organizationRelaId = "ID11133"
-        requestCreation.amount = 0
-        requestCreation.conditionId = 0
+        requestCreation.requestFormDetailRelaId = "e2move-detail"
+        requestCreation.organizationRelaId = "組織連携123"
+        requestCreation.amount = 1000
+        requestCreation.conditionNumber = 1
+        requestCreation.userName = "akimizu"
+
+        requestCreation.requestFormDetailRelaId = "e2move-detail"
+        requestCreation.organizationRelaId = "E2-MOVE-ORG-2"
+        requestCreation.amount = 1000
+        requestCreation.conditionNumber = 1
+        requestCreation.userName = "nghiant12345"
+
         Dim createRequest As Task(Of RequestInfo) = ws.CreateRequest(requestCreation)
         createRequest.Wait()
         Dim result = createRequest.Result
@@ -77,16 +85,16 @@
         Dim requestUpdate As New RequestUpdate()
         requestUpdate.requestStatus = 2
         requestUpdate.subject = "TEST"
-        requestUpdate.formData = ""
+        requestUpdate.formData = updateFormData(request.request.formDesign)
 
-
-        Dim process As New RequestProcess()
-        process.requestStep = 1
-        process.staffId = 10
-        process.orgId = 1
-        process.posId = 3
-        requestUpdate.process = New List(Of RequestProcess)
-        requestUpdate.process.Add(process)
+        Dim temp As Staff
+        For Each item As RequestProcess In request.process
+            temp = item.staffs(0)
+            item.staffId = temp.staffId
+            item.orgId = temp.orgId
+            item.posId = temp.posId
+        Next
+        requestUpdate.process = request.process
 
         Dim updateRequest As Task(Of RequestInfo) = ws.UpdateRequest(request.request.requestId, requestUpdate)
         updateRequest.Wait()
@@ -98,5 +106,40 @@
         End If
         Return Nothing
     End Function
+
+    Private Function apply(ByRef ws As WorkflowService, ByVal request As RequestInfo) As Request
+        Dim requestUpdate As New RequestUpdate()
+        requestUpdate.requestStatus = 2
+        requestUpdate.subject = "TEST"
+        requestUpdate.formData = updateFormData(request.request.formDesign)
+
+        Dim temp As Staff
+        For Each item As RequestProcess In request.process
+            temp = item.staffs(0)
+            item.staffId = temp.staffId
+            item.orgId = temp.orgId
+            item.posId = temp.posId
+        Next
+        requestUpdate.process = request.process
+
+        Dim updateRequest As Task(Of Request) = ws.ApplyRequest(request.request.requestId, requestUpdate)
+        updateRequest.Wait()
+        Dim result = updateRequest.Result
+        If Not result Is Nothing Then
+            Console.Write("APPLY REQUEST: ")
+            Console.WriteLine(result.requestId)
+            Return result
+        End If
+        Return Nothing
+    End Function
+
+    Private Function updateFormData(ByVal formData As String) As String
+        Dim formDataControls = JsonConvert.DeserializeObject(Of List(Of FormDataControl))(formData)
+        For Each control As FormDataControl In formDataControls
+            control.value = "test-value" + Rnd().ToString
+        Next
+        Return JsonConvert.SerializeObject(formDataControls)
+    End Function
+
 
 End Module

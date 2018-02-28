@@ -122,8 +122,8 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="WorkflowModel\FormDataControl.vb" />
     <Compile Include="WorkflowModel\Id.vb" />
-    <Compile Include="WorkflowModel\ListRequest.vb" />
     <Compile Include="WorkflowModel\Request.vb" />
     <Compile Include="WorkflowModel\RequestCondition.vb" />
     <Compile Include="WorkflowModel\RequestCreation.vb" />

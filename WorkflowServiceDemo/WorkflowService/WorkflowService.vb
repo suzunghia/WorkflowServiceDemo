@@ -76,7 +76,36 @@ Public Class WorkflowService
             'SSL error
             ServicePointManager.ServerCertificateValidationCallback = AddressOf Me.SetSSL
             'Send
-            Dim result = Await httpClient.PostAsJsonAsync("workflow", requestCreation)
+            Dim result = Await httpClient.PostAsJsonAsync("e2move/workflow", requestCreation)
+            result.EnsureSuccessStatusCode()
+            Return Await result.Content.ReadAsAsync(Of RequestInfo)
+        Catch ex As Exception
+            Console.WriteLine(ex)
+            Return Nothing
+        End Try
+        Return Nothing
+    End Function
+
+    Public Async Function GetRequest(ByVal requestId As Long) As Task(Of RequestInfo)
+        'Get token
+        If String.IsNullOrEmpty(Me.accessToken) Or Me.expires.CompareTo(Date.Now) < 0 Then
+            Dim tokenResult = Me.GetToken()
+            If tokenResult Is Nothing Then
+                Return Nothing
+            End If
+        End If
+
+
+        'Update request
+        httpClient.DefaultRequestHeaders.Clear()
+        httpClient.DefaultRequestHeaders.Authorization = New AuthenticationHeaderValue("Bearer", Me.accessToken)
+        httpClient.DefaultRequestHeaders.Accept.Add(New MediaTypeWithQualityHeaderValue("application/json"))
+
+        Try
+            'SSL error
+            ServicePointManager.ServerCertificateValidationCallback = AddressOf Me.SetSSL
+            'Send
+            Dim result = Await httpClient.GetAsync("e2move/workflow/" + requestId.ToString)
             result.EnsureSuccessStatusCode()
             Return Await result.Content.ReadAsAsync(Of RequestInfo)
         Catch ex As Exception
@@ -105,9 +134,38 @@ Public Class WorkflowService
             'SSL error
             ServicePointManager.ServerCertificateValidationCallback = AddressOf Me.SetSSL
             'Send
-            Dim result = Await httpClient.PutAsJsonAsync("workflow/" + requestId.ToString, request)
+            Dim result = Await httpClient.PutAsJsonAsync("e2move/workflow/" + requestId.ToString, request)
             result.EnsureSuccessStatusCode()
             Return Await result.Content.ReadAsAsync(Of RequestInfo)
+        Catch ex As Exception
+            Console.WriteLine(ex)
+            Return Nothing
+        End Try
+        Return Nothing
+    End Function
+
+    Public Async Function ApplyRequest(ByVal requestId As Long, ByVal request As RequestUpdate) As Task(Of Request)
+        'Get token
+        If String.IsNullOrEmpty(Me.accessToken) Or Me.expires.CompareTo(Date.Now) < 0 Then
+            Dim tokenResult = Me.GetToken()
+            If tokenResult Is Nothing Then
+                Return Nothing
+            End If
+        End If
+
+
+        'Update request
+        httpClient.DefaultRequestHeaders.Clear()
+        httpClient.DefaultRequestHeaders.Authorization = New AuthenticationHeaderValue("Bearer", Me.accessToken)
+        httpClient.DefaultRequestHeaders.Accept.Add(New MediaTypeWithQualityHeaderValue("application/json"))
+
+        Try
+            'SSL error
+            ServicePointManager.ServerCertificateValidationCallback = AddressOf Me.SetSSL
+            'Send
+            Dim result = Await httpClient.PostAsJsonAsync("e2move/workflow/exec/" + requestId.ToString, request)
+            result.EnsureSuccessStatusCode()
+            Return Await result.Content.ReadAsAsync(Of Request)
         Catch ex As Exception
             Console.WriteLine(ex)
             Return Nothing
@@ -132,7 +190,7 @@ Public Class WorkflowService
             'SSL error
             ServicePointManager.ServerCertificateValidationCallback = AddressOf Me.SetSSL
             'Send
-            Dim result = Await httpClient.DeleteAsync("workflow/admin/" + requestId.ToString)
+            Dim result = Await httpClient.DeleteAsync("e2move/workflow/" + requestId.ToString)
             result.EnsureSuccessStatusCode()
             Return True
         Catch ex As Exception
@@ -142,7 +200,7 @@ Public Class WorkflowService
         Return False
     End Function
 
-    Public Async Function GetRequestStatus(ByVal requestIds As List(Of Id)) As Task(Of ListRequest)
+    Public Async Function GetRequestStatus(ByVal requestIds As List(Of Id)) As Task(Of List(Of Request))
         'Get token
         If String.IsNullOrEmpty(Me.accessToken) Or Me.expires.CompareTo(Date.Now) < 0 Then
             Dim tokenResult = Me.GetToken()
@@ -160,9 +218,9 @@ Public Class WorkflowService
             'SSL error
             ServicePointManager.ServerCertificateValidationCallback = AddressOf Me.SetSSL
             'Send
-            Dim result = Await httpClient.PostAsJsonAsync("workflows_e2move", requestIds)
+            Dim result = Await httpClient.PostAsJsonAsync("e2move/workflows", requestIds)
             result.EnsureSuccessStatusCode()
-            Return Await result.Content.ReadAsAsync(Of ListRequest)
+            Return Await result.Content.ReadAsAsync(Of List(Of Request))
         Catch ex As Exception
             Console.WriteLine(ex)
             Return Nothing

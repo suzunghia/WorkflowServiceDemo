@@ -5,6 +5,7 @@
     Public approveStatus As Integer?
     Public allowSkip As Integer?
     Public skipByUser As Integer?
+    Public skipType As Integer?
     Public approvalType As Integer?
     Public delegateApprovalFlag As Integer?
     Public label As String
