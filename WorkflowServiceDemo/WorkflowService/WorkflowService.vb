@@ -217,10 +217,53 @@ Public Class WorkflowService
         Try
             'SSL error
             ServicePointManager.ServerCertificateValidationCallback = AddressOf Me.SetSSL
+            'Parse
+            Dim request As String = String.Empty
+            For Each item As Id In requestIds
+                If request.Equals(String.Empty) Then
+                    request = item.id.ToString
+                Else
+                    request = "," + item.id.ToString
+                End If
+            Next
             'Send
-            Dim result = Await httpClient.PostAsJsonAsync("e2move/workflows", requestIds)
+            Dim result = Await httpClient.GetAsync("e2move/workflows?requestids=")
             result.EnsureSuccessStatusCode()
             Return Await result.Content.ReadAsAsync(Of List(Of Request))
+        Catch ex As Exception
+            Console.WriteLine(ex)
+            Return Nothing
+        End Try
+        Return Nothing
+    End Function
+
+    Public Async Function GetSignedUrl(ByVal requestId As Long, ByVal controlName As String, ByVal fileName As String, ByVal userName As String, ByVal method As String) As Task(Of String)
+        'Get token
+        If String.IsNullOrEmpty(Me.accessToken) Or Me.expires.CompareTo(Date.Now) < 0 Then
+            Dim tokenResult = Me.GetToken()
+            If tokenResult Is Nothing Then
+                Return Nothing
+            End If
+        End If
+
+        'Parameter
+        Dim parameter As String
+        parameter = "keyName=" + requestId.ToString + "-" + controlName + "-" + fileName
+        parameter += "&userName=" + userName
+        parameter += "&method=" + method
+
+        'Update request
+        httpClient.DefaultRequestHeaders.Clear()
+        httpClient.DefaultRequestHeaders.Authorization = New AuthenticationHeaderValue("Bearer", Me.accessToken)
+        httpClient.DefaultRequestHeaders.Accept.Add(New MediaTypeWithQualityHeaderValue("application/json"))
+
+        Try
+            'SSL error
+            ServicePointManager.ServerCertificateValidationCallback = AddressOf Me.SetSSL
+            'Send
+            Dim result = Await httpClient.GetAsync("e2move/signed_url?" + parameter)
+            result.EnsureSuccessStatusCode()
+            Return Await result.Content.ReadAsStringAsync
         Catch ex As Exception
             Console.WriteLine(ex)
             Return Nothing

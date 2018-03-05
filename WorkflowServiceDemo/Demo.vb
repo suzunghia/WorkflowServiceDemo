@@ -1,4 +1,7 @@
 ﻿Imports Newtonsoft.Json
+Imports Amazon.S3
+Imports System.Net
+Imports System.IO
 
 Module Demo
 
@@ -42,17 +45,18 @@ Module Demo
         'End If
 
         'Get list request
-        Dim requestids As New List(Of Id)
-        requestids.Add(New Id(569))
-        requestids.Add(New Id(570))
-        requestids.Add(New Id(571))
-        Dim listRequest As Task(Of List(Of Request)) = ws.GetRequestStatus(requestids)
-        If Not listRequest Is Nothing Then
-            Console.WriteLine("List request: ")
-            For Each item As Request In listRequest.Result
-                Console.WriteLine("requestid: " + item.requestId.ToString + "/ status: " + item.requestStatus.ToString)
-            Next
-        End If
+        'Dim requestids As New List(Of Id)
+        'requestids.Add(New Id(569))
+        'requestids.Add(New Id(570))
+        'requestids.Add(New Id(571))
+        'Dim listRequest As Task(Of List(Of Request)) = ws.GetRequestStatus(requestids)
+        'If Not listRequest Is Nothing Then
+        '    Console.WriteLine("List request: ")
+        '    For Each item As Request In listRequest.Result
+        '        Console.WriteLine("requestid: " + item.requestId.ToString + "/ status: " + item.requestStatus.ToString)
+        '    Next
+        'End If
+        uploadFile(570, "attach-file-preview", "nghiant12345", "mitani_aws.txt", "D:\mitani_aws.txt", ws)
         Console.ReadKey(True)
     End Sub
 
@@ -140,6 +144,30 @@ Module Demo
         Next
         Return JsonConvert.SerializeObject(formDataControls)
     End Function
+
+    Private Sub uploadFile(ByVal requestId As Long, ByVal controlName As String, ByVal userName As String, ByVal fileName As String, ByVal filePath As String, ByRef ws As WorkflowService)
+        Dim signedUrl As Task(Of String)
+        signedUrl = ws.GetSignedUrl(requestId, controlName, fileName, userName, "1")
+        signedUrl.Wait()
+        If Not signedUrl Is Nothing Then
+            Dim httpRequest As HttpWebRequest = CType(WebRequest.Create(signedUrl.Result), HttpWebRequest)
+            httpRequest.Method = "PUT"
+            Using dataStream As Stream = httpRequest.GetRequestStream()
+                Dim buffer(8000) As Byte
+                Using fileStream As FileStream = New FileStream(filePath, FileMode.Open, FileAccess.Read)
+                    Dim bytesRead As Int32 = 0
+                    Do
+                        bytesRead = fileStream.Read(buffer, 0, buffer.Length)
+                        If bytesRead > 0 Then
+                            dataStream.Write(buffer, 0, bytesRead)
+                        End If
+                    Loop Until bytesRead = 0
+                End Using
+            End Using
+            Dim response As HttpWebResponse = CType(httpRequest.GetResponse(), HttpWebResponse)
+            Console.WriteLine("UPLOAD FILE: " + response.StatusCode.ToString)
+        End If
+    End Sub
 
 
 End Module
