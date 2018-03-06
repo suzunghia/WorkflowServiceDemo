@@ -45,18 +45,27 @@ Module Demo
         'End If
 
         'Get list request
-        'Dim requestids As New List(Of Id)
-        'requestids.Add(New Id(569))
-        'requestids.Add(New Id(570))
-        'requestids.Add(New Id(571))
-        'Dim listRequest As Task(Of List(Of Request)) = ws.GetRequestStatus(requestids)
-        'If Not listRequest Is Nothing Then
-        '    Console.WriteLine("List request: ")
-        '    For Each item As Request In listRequest.Result
-        '        Console.WriteLine("requestid: " + item.requestId.ToString + "/ status: " + item.requestStatus.ToString)
-        '    Next
-        'End If
-        uploadFile(570, "attach-file-preview", "nghiant12345", "mitani_aws.txt", "D:\mitani_aws.txt", ws)
+        Dim requestids As New List(Of Id)
+        requestids.Add(New Id(569))
+        requestids.Add(New Id(570))
+        requestids.Add(New Id(571))
+        Dim listrequest As Task(Of List(Of Request)) = ws.GetRequestStatus(requestids)
+        If Not listrequest Is Nothing Then
+            Console.WriteLine("list request: ")
+            For Each item As Request In listrequest.Result
+                Console.WriteLine("requestid: " + item.requestId.ToString + "/ status: " + item.requestStatus.ToString)
+            Next
+        End If
+
+        'Upload file
+        'uploadFile(570, "attach-file-preview", "nghiant12345", "mitani_aws.txt", "D:\mitani_aws.txt", ws)
+
+        'View file
+        'viewFile(570, "attach-file-preview", "nghiant12345", "mitani_aws.txt", "D:\mitani_aws.txt", ws)
+
+        'Delete file
+        'deleteFile(570, "attach-file-preview", "nghiant12345", "mitani_aws.txt", "D:\mitani_aws.txt", ws)
+
         Console.ReadKey(True)
     End Sub
 
@@ -169,5 +178,25 @@ Module Demo
         End If
     End Sub
 
+    Private Sub viewFile(ByVal requestId As Long, ByVal controlName As String, ByVal userName As String, ByVal fileName As String, ByVal filePath As String, ByRef ws As WorkflowService)
+        Dim signedUrl As Task(Of String)
+        signedUrl = ws.GetSignedUrl(requestId, controlName, fileName, userName, "0")
+        signedUrl.Wait()
+        If Not signedUrl Is Nothing Then
+            Console.WriteLine("LINK FILE: " + signedUrl.Result)
+        End If
+    End Sub
+
+    Private Sub deleteFile(ByVal requestId As Long, ByVal controlName As String, ByVal userName As String, ByVal fileName As String, ByVal filePath As String, ByRef ws As WorkflowService)
+        Dim signedUrl As Task(Of String)
+        signedUrl = ws.GetSignedUrl(requestId, controlName, fileName, userName, "2")
+        signedUrl.Wait()
+        If Not signedUrl Is Nothing Then
+            Dim httpRequest As HttpWebRequest = CType(WebRequest.Create(signedUrl.Result), HttpWebRequest)
+            httpRequest.Method = "DELETE"
+            Dim response As HttpWebResponse = CType(httpRequest.GetResponse(), HttpWebResponse)
+            Console.WriteLine("DELETE FILE: " + response.StatusCode.ToString)
+        End If
+    End Sub
 
 End Module

@@ -227,7 +227,7 @@ Public Class WorkflowService
                 End If
             Next
             'Send
-            Dim result = Await httpClient.GetAsync("e2move/workflows?requestids=")
+            Dim result = Await httpClient.GetAsync("e2move/workflows?requestids=" + request)
             result.EnsureSuccessStatusCode()
             Return Await result.Content.ReadAsAsync(Of List(Of Request))
         Catch ex As Exception
