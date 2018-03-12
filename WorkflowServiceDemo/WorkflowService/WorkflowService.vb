@@ -4,6 +4,7 @@ Imports System.Net
 Imports System.Net.Http
 Imports System.Net.Http.Headers
 Imports System.Threading.Tasks
+Imports System.Web
 
 Public Class WorkflowService
     Public apiServerUrl As String
@@ -248,7 +249,9 @@ Public Class WorkflowService
 
         'Parameter
         Dim parameter As String
-        parameter = "keyName=" + requestId.ToString + "-" + controlName + "-" + fileName
+        parameter = "requestId=" + requestId.ToString
+        parameter += "&controlName=" + controlName
+        parameter += "&fileName=" + HttpUtility.UrlEncode(fileName)
         parameter += "&userName=" + userName
         parameter += "&method=" + method
 

@@ -58,7 +58,7 @@ Module Demo
         End If
 
         'Upload file
-        'uploadFile(570, "attach-file-preview", "nghiant12345", "mitani_aws.txt", "D:\mitani_aws.txt", ws)
+        uploadFile(570, "attach-file-preview", "nghiant12345", "20180227_e2move連携API説明15.txt", "D:\20180227_e2move連携API説明15.txt", ws)
 
         'View file
         'viewFile(570, "attach-file-preview", "nghiant12345", "mitani_aws.txt", "D:\mitani_aws.txt", ws)
