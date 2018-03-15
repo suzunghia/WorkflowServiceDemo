@@ -218,17 +218,8 @@ Public Class WorkflowService
         Try
             'SSL error
             ServicePointManager.ServerCertificateValidationCallback = AddressOf Me.SetSSL
-            'Parse
-            Dim request As String = String.Empty
-            For Each item As Id In requestIds
-                If request.Equals(String.Empty) Then
-                    request = item.id.ToString
-                Else
-                    request = "," + item.id.ToString
-                End If
-            Next
             'Send
-            Dim result = Await httpClient.GetAsync("e2move/workflows?requestids=" + request)
+            Dim result = Await httpClient.PostAsJsonAsync("e2move/workflows", requestIds)
             result.EnsureSuccessStatusCode()
             Return Await result.Content.ReadAsAsync(Of List(Of Request))
         Catch ex As Exception
