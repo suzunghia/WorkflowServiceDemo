@@ -6,11 +6,15 @@ Imports System.IO
 Module Demo
 
     Sub Main()
+        'Url của server API 
         Dim url As String = "https://dev.e2-cloud.jp/workflow/"
         url = "http://localhost:8080"
+        'Secret_id/secret key, được lưu trong bảng oauth_client_details
+        'Secret_id chính là company code
         Dim ws As New WorkflowService(url, "1234", "123456")
 
         'Call get token - example
+        'Lấy token tương ứng với secret_id/secret_key
         Dim getToken As Task(Of TokenResult) = ws.GetToken()
         getToken.Wait()
         Dim result = getToken.Result
@@ -19,24 +23,31 @@ Module Demo
             Console.WriteLine(result.access_token)
         End If
 
-        'Call create request
+        ''Call create request
+        ''Tạo request, bỏ cmt là chạy.
         'create(ws)
 
         'Dim requestInfo As Task(Of RequestInfo)
 
-        'Update
+        ''Update
+        ''Update request, trước khi update thì lấy thông tin request tương ứng
+        ''569 ở đây là id của request cần lấy thông tin
         'requestInfo = ws.GetRequest(569)
         'If Not requestInfo.Result Is Nothing Then
+        ''Update thông tin request
         '    update(ws, requestInfo.Result)
         'End If
 
         'Apply
+        ''Apply request, trước khi apply cũng lấy thông tin request tương ứng
         'requestInfo = ws.GetRequest(571)
         'If Not requestInfo.Result Is Nothing Then
+        ''Apply request, có sử dụng formData
         '    apply(ws, requestInfo.Result)
         'End If
 
         'Delete
+        ''Delete request với id truyền vào.
         'Dim deleteRequest As Task(Of Boolean) = ws.DeleteRequest(569)
         'deleteRequest.Wait()
         'If deleteRequest.Result Then
@@ -45,6 +56,7 @@ Module Demo
         'End If
 
         'Get list request
+        ''Lấy status của list request
         Dim requestids As New List(Of Id)
         requestids.Add(New Id(569))
         requestids.Add(New Id(570))
@@ -58,6 +70,9 @@ Module Demo
         End If
 
         'Upload file
+    ''Upload file gồm 2 bước:
+    ''Bước 1: Get signedurl
+    ''Bước 2: upload file sử dụng signedurl
         uploadFile(570, "attach-file-preview", "nghiant12345", "20180227_e2move連携API説明15.txt", "D:\20180227_e2move連携API説明15.txt", ws)
 
         'View file
@@ -71,17 +86,12 @@ Module Demo
 
     Private Function create(ByRef ws As WorkflowService) As RequestInfo
         Dim requestCreation As New RequestCreation()
+    'Set trị các tham số khi tạo request
         requestCreation.requestFormDetailRelaId = "e2move-detail"
         requestCreation.organizationRelaId = "組織連携123"
         requestCreation.amount = 1000
         requestCreation.conditionNumber = 1
         requestCreation.userName = "akimizu"
-
-        requestCreation.requestFormDetailRelaId = "e2move-detail"
-        requestCreation.organizationRelaId = "E2-MOVE-ORG-2"
-        requestCreation.amount = 1000
-        requestCreation.conditionNumber = 1
-        requestCreation.userName = "nghiant12345"
 
         Dim createRequest As Task(Of RequestInfo) = ws.CreateRequest(requestCreation)
         createRequest.Wait()
@@ -96,6 +106,7 @@ Module Demo
 
     Private Function update(ByRef ws As WorkflowService, ByVal request As RequestInfo) As RequestInfo
         Dim requestUpdate As New RequestUpdate()
+    'Set trị các tham số khi update request
         requestUpdate.requestStatus = 2
         requestUpdate.subject = "TEST"
         requestUpdate.formData = updateFormData(request.request.formDesign)
@@ -122,8 +133,11 @@ Module Demo
 
     Private Function apply(ByRef ws As WorkflowService, ByVal request As RequestInfo) As Request
         Dim requestUpdate As New RequestUpdate()
+'Set trị các tham số khi apply request
         requestUpdate.requestStatus = 2
         requestUpdate.subject = "TEST"
+'Form data được truyền lên theo format: [{"name":"control-name1","value":"value1"}, {"name":"control-name2","value":"value2"}]
+'Xử lý gán trị khi lấy thông tin control name từ formDesign
         requestUpdate.formData = updateFormData(request.request.formDesign)
 
         Dim temp As Staff
@@ -147,18 +161,23 @@ Module Demo
     End Function
 
     Private Function updateFormData(ByVal formData As String) As String
+'Parse formDesign thành list, mỗi phần tử có name và value
         Dim formDataControls = JsonConvert.DeserializeObject(Of List(Of FormDataControl))(formData)
         For Each control As FormDataControl In formDataControls
+'Gán value cho control tương ứng
             control.value = "test-value" + Rnd().ToString
         Next
+'Parse lại thành string
         Return JsonConvert.SerializeObject(formDataControls)
     End Function
 
     Private Sub uploadFile(ByVal requestId As Long, ByVal controlName As String, ByVal userName As String, ByVal fileName As String, ByVal filePath As String, ByRef ws As WorkflowService)
         Dim signedUrl As Task(Of String)
+'Get signedurl
         signedUrl = ws.GetSignedUrl(requestId, controlName, fileName, userName, "1")
         signedUrl.Wait()
         If Not signedUrl Is Nothing Then
+'Upload file sử dụng signedurl
             Dim httpRequest As HttpWebRequest = CType(WebRequest.Create(signedUrl.Result), HttpWebRequest)
             httpRequest.Method = "PUT"
             Using dataStream As Stream = httpRequest.GetRequestStream()
@@ -180,6 +199,7 @@ Module Demo
 
     Private Sub viewFile(ByVal requestId As Long, ByVal controlName As String, ByVal userName As String, ByVal fileName As String, ByVal filePath As String, ByRef ws As WorkflowService)
         Dim signedUrl As Task(Of String)
+'Get signedurl
         signedUrl = ws.GetSignedUrl(requestId, controlName, fileName, userName, "0")
         signedUrl.Wait()
         If Not signedUrl Is Nothing Then
@@ -189,9 +209,11 @@ Module Demo
 
     Private Sub deleteFile(ByVal requestId As Long, ByVal controlName As String, ByVal userName As String, ByVal fileName As String, ByVal filePath As String, ByRef ws As WorkflowService)
         Dim signedUrl As Task(Of String)
+'Get signedurl
         signedUrl = ws.GetSignedUrl(requestId, controlName, fileName, userName, "2")
         signedUrl.Wait()
         If Not signedUrl Is Nothing Then
+'Delete file sử dụng signedurl
             Dim httpRequest As HttpWebRequest = CType(WebRequest.Create(signedUrl.Result), HttpWebRequest)
             httpRequest.Method = "DELETE"
             Dim response As HttpWebResponse = CType(httpRequest.GetResponse(), HttpWebResponse)
