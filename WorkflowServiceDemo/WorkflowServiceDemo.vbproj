@@ -130,6 +130,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="WorkflowModel\FormDataControl.vb" />
+    <Compile Include="WorkflowModel\FormDataValues.vb" />
     <Compile Include="WorkflowModel\RequestId.vb" />
     <Compile Include="WorkflowModel\Request.vb" />
     <Compile Include="WorkflowModel\RequestCondition.vb" />

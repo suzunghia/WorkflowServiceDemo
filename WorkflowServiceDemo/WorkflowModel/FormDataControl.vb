@@ -1,25 +1,31 @@
 ﻿Public Class FormDataControl
-    Private type As String
-    Private grid As String
-    Private img As String
-    Private label As String
-    Private className As String
+    Public type As String
+    Public grid As String
+    Public img As String
+    Public label As String
+    Public className As String
     Public name As String
     Public value As String
-    Private required As Boolean
-    Private description As String
-    Private inline As Boolean
-    Private other As Boolean
-    Private subtype As Boolean
-    Private placeholder As String
-    Private min As String
-    Private max As String
-    'Private  Step As String
-    Private maxlength As String
-    Private rows As String
-    Private hr As String
-    Private multiple As Boolean
-    Private toggle As Boolean
-    Private html As String
-    Private height As String
+    Public required As Boolean
+    Public description As String
+    Public inline As Boolean
+    Public other As Boolean
+    Public subtype As Boolean
+    Public placeholder As String
+    Public values As List(Of FormDataValues)
+    Public min As String
+    Public max As String
+    Public step2 As String
+    Public maxlength As String
+    Public rows As String
+    Public hr As String
+    Public multiple As Boolean
+    Public selectmulti As String
+    Public toggle As Boolean
+    Public html As String
+    Public height As String
+    Public hrheight As String
+    Public attach As String
+    Public attachname As String
+    Public caculator As String
 End Class
