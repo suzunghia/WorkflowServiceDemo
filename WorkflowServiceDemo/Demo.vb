@@ -8,9 +8,10 @@ Module Demo
     Sub Main()
         'Url của server API 
         Dim url As String = "https://dev.e2-cloud.jp/workflow_stg/"
+        url = "https://dev.e2-cloud.jp/workflow/"
         'client_id/client_secret, được lưu trong bảng oauth_client_details
         'client_id chính là company code
-        Dim ws As New WorkflowService(url, "2222", "123456")
+        Dim ws As New WorkflowService(url, "1111", "123456")
 
         'Call get token - example
         'Lấy token tương ứng với client_id/client_secret
@@ -39,11 +40,11 @@ Module Demo
 
         'Apply
         'Apply request, trước khi apply cũng lấy thông tin request tương ứng
-        'requestInfo = ws.GetRequest(573)
-        'If Not requestInfo.Result Is Nothing Then
-        '    'Apply request, có sử dụng formData
-        '    apply(ws, requestInfo.Result)
-        'End If
+        requestInfo = ws.GetRequest(4167)
+        If Not requestInfo.Result Is Nothing Then
+            'apply request, có sử dụng formdata
+            apply(ws, requestInfo.Result)
+        End If
 
         'Delete
         ''Delete request với id truyền vào.
@@ -99,6 +100,12 @@ Module Demo
         'requestCreation.conditionNumber = 1
         'requestCreation.userName = "nghiant12345"
 
+        requestCreation.requestFormDetailRelaId = "e2move"
+        requestCreation.organizationRelaId = "組織連携123"
+        requestCreation.amount = 1000
+        requestCreation.conditionNumber = 0
+        requestCreation.userName = "akimizu"
+
         Dim createRequest As Task(Of RequestInfo) = ws.CreateRequest(requestCreation)
         createRequest.Wait()
         Dim result = createRequest.Result
@@ -132,12 +139,12 @@ Module Demo
         'Set trị các tham số khi apply request
         requestUpdate.requestStatus = 2
         requestUpdate.subject = "TEST"
-        requestUpdate.conditionNumber = 1
+        requestUpdate.conditionNumber = 0
         requestUpdate.amount = 1000
         'Form data được truyền lên theo format: [{"name":"control-name1","value":"value1"}, {"name":"control-name2","value":"value2"}]
         'Xử lý gán trị khi lấy thông tin control name từ formDesign
-        ''requestUpdate.formData = updateFormData(request.request.formDesign, request.request.requestId)
-        requestUpdate.formData = "[{""type"":""paragraph"",""grid"":""col-sm-6"",""label"":""ラベル"",""subtype"":""p""},{""type"":""text"",""grid"":""col-sm-6"",""label"":""テキストフィールド"",""className"":""form-control"",""name"":""text-1521183155857"",""value"":""11111"",""subtype"":""text""},{""type"":""textarea"",""grid"":""col-sm-6"",""label"":""テキストエリア"",""className"":""form-control"",""name"":""textarea-1521183156448"",""value"":""22222""},{""type"":""html"",""grid"":""col-sm-6"",""label"":""HTML"",""name"":""html-1521183156992"",""html"":""<p>33333333</p>"",""height"":""372""},{""type"":""number"",""grid"":""col-sm-6"",""label"":""数値"",""className"":""form-control"",""name"":""number-1521183158022"",""value"":""444444""},{""type"":""caculator"",""grid"":""col-sm-6"",""label"":""電卓"",""name"":""caculator-1521183158386""},{""type"":""date"",""grid"":""col-sm-6"",""label"":""日付フィールド"",""className"":""form-control"",""name"":""date-1521183159962"",""value"":""2018/03/22""},{""type"":""monthyear"",""grid"":""col-sm-6"",""label"":""年月フィールド"",""name"":""monthyear-1521183160546"",""value"":""2018/05""},{""type"":""attach"",""grid"":""col-sm-6"",""label"":""添付ファイル"",""name"":""attach-1521183161106""},{""type"":""checkbox-group"",""grid"":""col-sm-6"",""label"":""チェックボックスグループ"",""name"":""checkbox-group-1521183162348"",""values"":[{""label"":""オプション 1"",""value"":""1"",""selected"":true}]},{""type"":""radio-group"",""grid"":""col-sm-6"",""label"":""ラジオ・グループ"",""name"":""radio-group-1521183163593"",""values"":[{""label"":""オプション 1"",""value"":""1"",""selected"":true},{""label"":""オプション 2"",""value"":""2""}]},{""type"":""select"",""grid"":""col-sm-6"",""label"":""選択"",""className"":""form-control"",""name"":""select-1521183164202"",""values"":[{""label"":""オプション 1"",""value"":""1""},{""label"":""オプション 2"",""value"":""2"",""selected"":true}],""selectmulti"":""2""},{""type"":""space"",""grid"":""col-sm-6"",""name"":""space-1521183164852""},{""type"":""hr"",""grid"":""col-sm-12"",""name"":""hr-1521183165444"",""hr"":""style1"",""hrheight"":""23""},{""type"":""header"",""grid"":""col-sm-6"",""label"":""ヘッダ"",""subtype"":""h1""},{""type"":""image"",""grid"":""col-sm-6"",""img"":""https://dev-workflow-1111.s3-ap-northeast-1.amazonaws.com/Attach%20File/4112-image-1521183167124.png"",""label"":""画像"",""name"":""image-1521183167124"",""value"":""C:\\fakepath\\build_result.png""}]"
+        requestUpdate.formData = updateFormData(request.request.formDesign, request.request.requestId)
+        'requestUpdate.formData = "[{""type"":""paragraph"",""grid"":""col-sm-6"",""label"":""ラベル"",""subtype"":""p""},{""type"":""text"",""grid"":""col-sm-6"",""label"":""テキストフィールド"",""className"":""form-control"",""name"":""text-1521183155857"",""value"":""11111"",""subtype"":""text""},{""type"":""textarea"",""grid"":""col-sm-6"",""label"":""テキストエリア"",""className"":""form-control"",""name"":""textarea-1521183156448"",""value"":""22222""},{""type"":""html"",""grid"":""col-sm-6"",""label"":""HTML"",""name"":""html-1521183156992"",""html"":""<p>33333333</p>"",""height"":""372""},{""type"":""number"",""grid"":""col-sm-6"",""label"":""数値"",""className"":""form-control"",""name"":""number-1521183158022"",""value"":""444444""},{""type"":""caculator"",""grid"":""col-sm-6"",""label"":""電卓"",""name"":""caculator-1521183158386""},{""type"":""date"",""grid"":""col-sm-6"",""label"":""日付フィールド"",""className"":""form-control"",""name"":""date-1521183159962"",""value"":""2018/03/22""},{""type"":""monthyear"",""grid"":""col-sm-6"",""label"":""年月フィールド"",""name"":""monthyear-1521183160546"",""value"":""2018/05""},{""type"":""attach"",""grid"":""col-sm-6"",""label"":""添付ファイル"",""name"":""attach-1521183161106""},{""type"":""checkbox-group"",""grid"":""col-sm-6"",""label"":""チェックボックスグループ"",""name"":""checkbox-group-1521183162348"",""values"":[{""label"":""オプション 1"",""value"":""1"",""selected"":true}]},{""type"":""radio-group"",""grid"":""col-sm-6"",""label"":""ラジオ・グループ"",""name"":""radio-group-1521183163593"",""values"":[{""label"":""オプション 1"",""value"":""1"",""selected"":true},{""label"":""オプション 2"",""value"":""2""}]},{""type"":""select"",""grid"":""col-sm-6"",""label"":""選択"",""className"":""form-control"",""name"":""select-1521183164202"",""values"":[{""label"":""オプション 1"",""value"":""1""},{""label"":""オプション 2"",""value"":""2"",""selected"":true}],""selectmulti"":""2""},{""type"":""space"",""grid"":""col-sm-6"",""name"":""space-1521183164852""},{""type"":""hr"",""grid"":""col-sm-12"",""name"":""hr-1521183165444"",""hr"":""style1"",""hrheight"":""23""},{""type"":""header"",""grid"":""col-sm-6"",""label"":""ヘッダ"",""subtype"":""h1""},{""type"":""image"",""grid"":""col-sm-6"",""img"":""https://dev-workflow-1111.s3-ap-northeast-1.amazonaws.com/Attach%20File/4112-image-1521183167124.png"",""label"":""画像"",""name"":""image-1521183167124"",""value"":""C:\\fakepath\\build_result.png""}]"
         Dim temp As Staff
         'Set process
         For Each item As RequestProcess In request.process

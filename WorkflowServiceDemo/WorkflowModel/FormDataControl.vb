@@ -10,7 +10,7 @@
     Public description As String
     Public inline As Boolean
     Public other As Boolean
-    Public subtype As Boolean
+    Public subtype As String
     Public placeholder As String
     Public values As List(Of FormDataValues)
     Public min As String
