@@ -15,7 +15,7 @@
     Public values As List(Of FormDataValues)
     Public min As String
     Public max As String
-    Public step2 As String
+    Public stepnumber As String
     Public maxlength As String
     Public rows As String
     Public hr As String
