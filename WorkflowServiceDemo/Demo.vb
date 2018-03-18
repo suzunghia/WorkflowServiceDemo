@@ -2,6 +2,7 @@
 Imports Amazon.S3
 Imports System.Net
 Imports System.IO
+Imports System.Web
 
 Module Demo
 
@@ -163,11 +164,14 @@ Module Demo
         For Each control As FormDataControl In formDataControls
             'Gán value cho control tương ứng
             'Checkbox group, Radio group, Select control
-            If control.type = "checkbox-group" Or control.type = "radio-group" Or control.type = "select" Then
+            If control.type = "checkbox-group" Or control.type = "radio-group" Or (control.type = "select" And control.multiple = False) Then
                 control.values(0).selected = True
+            ElseIf control.type = "select" And control.multiple = True Then
+                control.values(0).selected = True
+                control.values(1).selected = True
             ElseIf (control.type = "text" And control.name = "text-1521183155857") Or control.type = "textarea" Then
                 control.value = "test-value" + Rnd().ToString
-            ElseIf control.type = "number" Then
+            ElseIf control.type = "number" Or control.type = "calculator" Then
                 control.value = Rnd().ToString
             ElseIf control.type = "date" Then
                 control.value = "2018/03/16"
@@ -177,8 +181,10 @@ Module Demo
                 control.html = "<h1>Test</h1>"
             ElseIf control.type = "attach" Then
                 uploadFile(requestId, control.name + "-preview", "akimizu", "20180227_e2move連携API説明15.txt", "20180227_e2move連携API説明15.txt", ws)
-                control.attach = requestId.ToString() + "-" + control.name + "-preview" + "-20180227_e2move連携API説明15.txt"
-                control.attachname = "20180227_e2move連携API説明15.txt"
+                Dim frontUrl = "https://dev.e2-cloud.jp/mitani_group/#/file/"
+                control.attach = frontUrl + requestId.ToString() + "-" + control.name + "-preview-" + HttpUtility.UrlEncode("20180227_e2move連携API説明15.txt")
+                control.attachname = requestId.ToString() + "-" + control.name + "-preview-" + HttpUtility.UrlEncode("20180227_e2move連携API説明15.txt")
+                control.value = "20180227_e2move連携API説明15.txt"
             ElseIf control.type = "image" Then
                 control.img = "data:image/png;base64," + Convert.ToBase64String(File.ReadAllBytes("test.png"))
             ElseIf control.type = "paragraph" Or control.type = "header" Then
