@@ -23,23 +23,9 @@ Module Demo
             Console.WriteLine(result.access_token)
         End If
 
-        ''Call create request
-        ''Tạo request, bỏ cmt là chạy.
-
+        ''Tạo, get và apply request
         Dim request As RequestInfo = create(ws)
         Dim requestInfo As Task(Of RequestInfo)
-
-        ''Update
-        ''Update request, trước khi update thì lấy thông tin request tương ứng
-        ''760 ở đây là id của request cần lấy thông tin
-        'requestInfo = ws.GetRequest(573)
-        'If Not requestInfo.Result Is Nothing Then
-        '    'Update thông tin request
-        '    update(ws, requestInfo.Result)
-        'End If
-
-        'Apply
-        'Apply request, trước khi apply cũng lấy thông tin request tương ứng
         If Not request Is Nothing Then
             requestInfo = ws.GetRequest(request.request.requestId)
             requestInfo.Wait()
@@ -49,42 +35,28 @@ Module Demo
             End If
         End If
 
+        ''Tạo, get và update request
+        request = create(ws)
+        If Not request Is Nothing Then
+            requestInfo = ws.GetRequest(request.request.requestId)
+            update(ws, requestInfo.Result)
+        End If
 
-        'Delete
-        ''Delete request với id truyền vào.
-        'Dim deleteRequest As Task(Of Boolean) = ws.DeleteRequest(569)
-        'deleteRequest.Wait()
-        'If deleteRequest.Result Then
-        '    Console.Write("DELETE REQUEST: ")
-        '    Console.WriteLine(569)
-        'End If
 
         'Get list request
         ''Lấy status của list request
-        'Dim requestids As New List(Of RequestId)
-        'requestids.Add(New RequestId(760))
-        'requestids.Add(New RequestId(761))
-        'requestids.Add(New RequestId(762))
-        'Dim listrequest As Task(Of List(Of Request)) = ws.GetRequestStatus(requestids)
-        'listrequest.Wait()
-        'If Not listrequest Is Nothing Then
-        '    Console.WriteLine("list request: ")
-        '    For Each item As Request In listrequest.Result
-        '        Console.WriteLine("requestid: " + item.requestId.ToString + "/ status: " + item.requestStatus.ToString)
-        '    Next
-        'End If
-
-        'Upload file
-        ''Upload file gồm 2 bước:
-        ''Bước 1: Get signedurl
-        ''Bước 2: upload file sử dụng signedurl
-        'uploadFile(760, "attach-1521172697473-preview", "DuyenVTH", "20180227_e2move連携API説明15.txt", "D:\20180227_e2move連携API説明15.txt", ws)
-
-        'View file
-        'viewFile(760, "attach-1521172697473-preview", "DuyenVTH", "20180227_e2move連携API説明15.txt", ws)
-
-        'Delete file
-        'deleteFile(760, "attach-1521172697473-preview", "DuyenVTH", "20180227_e2move連携API説明15.txt", ws)
+        Dim requestids As New List(Of RequestId)
+        requestids.Add(New RequestId(4199))
+        requestids.Add(New RequestId(4197))
+        requestids.Add(New RequestId(4200))
+        Dim listrequest As Task(Of List(Of Request)) = ws.GetRequestStatus(requestids)
+        listrequest.Wait()
+        If Not listrequest Is Nothing Then
+            Console.WriteLine("list request: ")
+            For Each item As Request In listrequest.Result
+                Console.WriteLine("requestid: " + item.requestId.ToString + "/ status: " + item.requestStatus.ToString)
+            Next
+        End If
 
         Console.ReadKey(True)
     End Sub
@@ -112,7 +84,7 @@ Module Demo
     Private Function update(ByRef ws As WorkflowService, ByVal request As RequestInfo) As RequestInfo
         Dim requestUpdate As New RequestUpdate()
         'Set trị các tham số khi update request
-        requestUpdate.amount = 1000
+        requestUpdate.amount = 5000
         requestUpdate.conditionNumber = 0
 
         Dim updateRequest As Task(Of RequestInfo) = ws.UpdateRequest(request.request.requestId, requestUpdate)
